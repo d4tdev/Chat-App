@@ -9,6 +9,8 @@ app.use(cors());
 
 require('./configs/connectDB');
 
+// Test 
+
 require('./routes/index.route')(app);
 
 module.exports = app;
