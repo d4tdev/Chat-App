@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from 'react';
 import { baseUrl, getRequest, postRequest } from '../utils/services';
+import { io } from 'socket.io-client';
 
 export const ChatContext = createContext();
 
@@ -14,6 +15,64 @@ export const ChatContextProvider = ({ children, user }) => {
    const [messagesError, setMessagesError] = useState('');
    const [newMessage, setNewMessage] = useState('');
    const [sendTextMessageError, setSendTextMessageError] = useState('');
+   const [socket, setSocket] = useState(null);
+   const [onlineUsers, setOnlineUsers] = useState([]); // [userId, socketId]
+
+   // Initial socket
+   useEffect(() => {
+      const newSocket = io('http://localhost:3000');
+      setSocket(newSocket);
+
+      return () => {
+         newSocket.disconnect();
+      };
+   }, [user]);
+
+   // Emit to server when user logs in (online)
+   useEffect(() => {
+      if (socket === null) return;
+      socket.emit('addNewUser', user?._id);
+      socket.on('getOnlineUsers', (onlineUsers) => {
+         setOnlineUsers(onlineUsers);
+      });
+
+      return () => {
+         socket.off('getOnlineUsers');
+      };
+   }, [socket]);
+   // Emit send message
+   useEffect(() => {
+      if (socket === null) return;
+
+      const recipientId = currentChat?.members?.find((id) => id !== user?._id);
+      socket.emit('sendMessage', { ...newMessage, recipientId });
+   }, [newMessage]);
+   // Emit receive message
+   useEffect(() => {
+      if (socket === null) return;
+
+      socket.on(
+         'getMessage',
+         (
+            data = {
+               chatId: '',
+               createdAt: '',
+               recipientId: '',
+               senderId: '',
+               text: '',
+               updatedAt: '',
+            }
+         ) => {
+            if (currentChat?._id !== data.chatId) return;
+            setMessages((prev) => [...prev, data]);
+         }
+      );
+
+      // Clean up event
+      return () => {
+         socket.off('getMessage');
+      };
+   }, [socket, currentChat]);
 
    useEffect(() => {
       const getUsers = async () => {
@@ -118,6 +177,7 @@ export const ChatContextProvider = ({ children, user }) => {
             isMessagesLoading,
             messagesError,
             sendTextMessage,
+            onlineUsers,
          }}>
          {children}
       </ChatContext.Provider>

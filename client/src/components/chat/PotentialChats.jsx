@@ -5,7 +5,7 @@ import defaultAvt from '../../assets/default_avt.svg';
 
 const PotentialChats = () => {
    const { user } = useContext(AuthContext);
-   const { potentialChats, createChat } = useContext(ChatContext);
+   const { potentialChats, createChat, onlineUsers } = useContext(ChatContext);
 
    return (
       <>
@@ -29,7 +29,14 @@ const PotentialChats = () => {
                            </div>
                         </div>
                         <div className="d-flex flex-column align-items-end">
-                           <span className="potential-online"></span>
+                           <span
+                              className={
+                                 onlineUsers?.some(
+                                    (user) => user.userId === u?._id
+                                 )
+                                    ? 'potential-online'
+                                    : ''
+                              }></span>
                         </div>
                      </div>
                   );

@@ -1,0 +1,35 @@
+const { Server } = require('socket.io');
+
+const io = new Server({ cors: { origin: 'http://localhost:5173' } });
+
+let onlineUsers = [];
+
+io.on('connection', (socket) => {
+   console.log(`New connection: `, socket.id);
+
+   // Listen to a connection when a user logs in (online)
+   socket.on('addNewUser', (userId) => {
+      !onlineUsers.some((user) => user.userId === userId) &&
+         userId !== null &&
+         onlineUsers.push({ userId, socketId: socket?.id });
+      io.emit('getOnlineUsers', onlineUsers);
+   });
+
+   // Listen to a connection when a user sends a message
+   socket.on('sendMessage', (data) => {
+      console.log(`Message received: `, data);
+      const recipient = onlineUsers.find(
+         (user) => user.userId === data.recipientId
+      );
+      recipient && io.to(recipient.socketId).emit('getMessage', data);
+   });
+
+   // Listen to a connection when a user logs out (offline)
+   socket.on('disconnect', () => {
+      console.log(`User disconnected: `, socket.id);
+      onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+      io.emit('getOnlineUsers', onlineUsers);
+   });
+});
+
+io.listen(3000);
