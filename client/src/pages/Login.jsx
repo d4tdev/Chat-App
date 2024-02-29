@@ -1,9 +1,20 @@
 import { Alert, Button, Form, Row, Col, Stack } from 'react-bootstrap';
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
 
 const Login = () => {
+   const {
+      user,
+      loginUser,
+      loginInfo,
+      updateLoginInfo,
+      loginError,
+      isLoginLoading,
+   } = useContext(AuthContext);
+
    return (
       <>
-         <Form>
+         <Form onSubmit={loginUser}>
             <Row
                style={{
                   height: '100vh',
@@ -14,15 +25,33 @@ const Login = () => {
                   <Stack gap={3}>
                      <h2>Login</h2>
 
-                     <Form.Control type="email" placeholder="Email" />
-                     <Form.Control type="password" placeholder="Password" />
+                     <Form.Control
+                        type="email"
+                        placeholder="Email"
+                        onChange={(e) =>
+                           updateLoginInfo({
+                              ...loginInfo,
+                              email: e.target.value,
+                           })
+                        }
+                     />
+                     <Form.Control
+                        type="password"
+                        placeholder="Password"
+                        onChange={(e) =>
+                           updateLoginInfo({
+                              ...loginInfo,
+                              password: e.target.value,
+                           })
+                        }
+                     />
 
                      <Button variant="primary" type="submit">
-                        Login
+                        {isLoginLoading ? 'Loading...' : 'Login'}
                      </Button>
-                     <Alert variant="danger">
-                        <p>An error occurred</p>
-                     </Alert>
+                     {loginError && (
+                        <Alert variant="danger">{loginError}</Alert>
+                     )}
                   </Stack>
                </Col>
             </Row>

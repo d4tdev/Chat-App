@@ -1,4 +1,4 @@
-import { createContext, useCallback, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import { baseUrl, postRequest } from '../utils/services';
 
 export const AuthContext = createContext();
@@ -7,18 +7,27 @@ export const AuthContextProvider = ({ children }) => {
    const [user, setUser] = useState(null);
    const [registerError, setRegisterError] = useState(null);
    const [isRegisterLoading, setIsRegisterLoading] = useState(false);
+   const [loginError, setLoginError] = useState(null);
+   const [isLoginLoading, setIsLoginLoading] = useState(false);
    const [registerInfo, setRegisterInfo] = useState({
       name: '',
       email: '',
       password: '',
       username: '',
    });
-   console.log(`registerInfo: `, registerInfo);
+   const [loginInfo, setLoginInfo] = useState({
+      email: '',
+      password: '',
+   });
+   useEffect(() => {
+      const user = localStorage.getItem('user');
+
+      setUser(user ? JSON.parse(user) : null);
+   }, []);
 
    const updateRegisterInfo = useCallback((info) => {
       setRegisterInfo(info);
    }, []);
-
    const registerUser = useCallback(
       async (e) => {
          e.preventDefault();
@@ -39,6 +48,34 @@ export const AuthContextProvider = ({ children }) => {
       [registerInfo]
    );
 
+   const updateLoginInfo = useCallback((info) => {
+      setLoginInfo(info);
+   }, []);
+   const loginUser = useCallback(
+      async (e) => {
+         e.preventDefault();
+         setIsLoginLoading(true);
+         setLoginError(null);
+
+         const response = await postRequest(
+            `${baseUrl}/users/login`,
+            loginInfo
+         );
+
+         setIsLoginLoading(false);
+         if (response.error) return setLoginError(response.message);
+
+         localStorage.setItem('user', JSON.stringify(response.metadata));
+         setUser(response.metadata);
+      },
+      [loginInfo]
+   );
+
+   const logoutUser = useCallback(() => {
+      localStorage.removeItem('user');
+      setUser(null);
+   }, []);
+
    return (
       <AuthContext.Provider
          value={{
@@ -48,6 +85,12 @@ export const AuthContextProvider = ({ children }) => {
             registerUser,
             registerError,
             isRegisterLoading,
+            loginInfo,
+            updateLoginInfo,
+            loginUser,
+            loginError,
+            isLoginLoading,
+            logoutUser,
          }}>
          {children}
       </AuthContext.Provider>

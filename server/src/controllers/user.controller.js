@@ -51,7 +51,8 @@ class UserController {
          });
 
          const token = createToken(newUser._id);
-         delete newUser.password;
+
+         newUser.password = undefined;
          return res.status(201).json({
             success: true,
             token,
@@ -59,7 +60,10 @@ class UserController {
          });
       } catch (error) {
          console.error(error);
-         res.status(500).json({ success: false, message: 'Server error' });
+         res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+         });
       }
    };
 
@@ -90,6 +94,8 @@ class UserController {
          }
 
          const token = createToken(user._id);
+         // Exclude password
+         user.password = undefined;
          return res.status(200).json({
             success: true,
             token,
@@ -97,7 +103,10 @@ class UserController {
          });
       } catch (error) {
          console.error(error);
-         res.status(500).json({ success: false, message: 'Server error' });
+         res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+         });
       }
    };
 
@@ -112,13 +121,17 @@ class UserController {
                message: 'User not found',
             });
          }
+         user.password = undefined;
          return res.status(200).json({
             success: true,
             metadata: user,
          });
       } catch (error) {
          console.error(error);
-         res.status(500).json({ success: false, message: 'Server error' });
+         res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+         });
       }
    };
 
@@ -131,7 +144,10 @@ class UserController {
          });
       } catch (error) {
          console.error(error);
-         res.status(500).json({ success: false, message: 'Server error' });
+         res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+         });
       }
    };
 }

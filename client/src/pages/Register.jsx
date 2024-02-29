@@ -68,9 +68,7 @@ const Register = () => {
                         {isRegisterLoading ? 'Loading...' : 'Register'}
                      </Button>
                      {registerError && (
-                        <Alert variant="danger">
-                           <p>{registerError}</p>
-                        </Alert>
+                        <Alert variant="danger">{registerError}</Alert>
                      )}
                   </Stack>
                </Col>
