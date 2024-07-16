@@ -13,9 +13,10 @@ cai tren -t la tag
 
 #
 1. Add jenkins user -> docker: sudo usermod -a -G docker jenkins
-2. Using jenkins no passwd: sudo visudo // NOPASSWD: ALL
+2. Using jenkins no passwd: sudo visudo // jenkins ALL=(ALL) NOPASSWD: ALL
 3. Change permision: chmod u+w myfile.txt
 
 #
 ps aux | grep prep
 fuser -k 4090/tcp
+

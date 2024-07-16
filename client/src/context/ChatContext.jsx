@@ -22,7 +22,7 @@ export const ChatContextProvider = ({ children, user }) => {
 
    // Initial socket
    useEffect(() => {
-      const newSocket = io('http://localhost:4090');
+      const newSocket = io('https://chat-app-jcro.onrender.com');
       setSocket(newSocket);
 
       return () => {
